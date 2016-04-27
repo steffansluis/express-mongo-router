@@ -1,0 +1,35 @@
+{
+  "name": "express-mongo-router",
+  "version": "0.1.0",
+  "description": "RESTful Express router for MongoDB collections",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "nyc tap -R tap test/index.js",
+    "coverage": "nyc report --reporter=text-lcov | codecov",
+    "watch-test": "watch 'npm test' test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/steffansluis/express-mongo-router.git"
+  },
+  "author": "Steffan Sluis <steffansluis@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/steffansluis/express-mongo-router/issues"
+  },
+  "homepage": "https://github.com/steffansluis/express-mongo-router",
+  "dependencies": {
+    "body-parser": "~1.14.1",
+    "express": "~4.13.3"
+  },
+  "devDependencies": {
+    "blue-tape": "^0.2.0",
+    "codecov": "^1.0.1",
+    "nyc": "^6.0.0",
+    "proxyquire": "^1.7.4",
+    "sinon": "^1.17.3",
+    "supertest": "^1.2.0",
+    "tap": "^5.7.0"
+  }
+}
