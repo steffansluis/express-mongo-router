@@ -13,7 +13,10 @@ const find = collection => query => {
 }
 
 const put = collection => query => params => {
-  return Promise.resolve(collection.updateOne(query, {$set: params}))
+  return Promise.resolve(collection.findAndModify(query, [], params, {
+      update: true
+    }))
+    .then(result => result.value);
 }
 
 const del = collection => query => {
