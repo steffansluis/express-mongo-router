@@ -2,7 +2,10 @@ const express = require('express');
 const handle  = require('./handlers');
 const Errors  = require('./errors');
 
-const respond = (resultName, handler) => {
+const respond = Config => {
+  const { resultName, handler } = Config;
+  const mapper = Config.mapper || JSON.stringify;
+
   return (req, res, next) => {
     const args = {params: req.params, data: Object.assign({}, req.query, req.body)};
 
@@ -14,40 +17,63 @@ const respond = (resultName, handler) => {
 
         var result = {};
         result[resultName] = response.body;
-        res.status(response.status).json(result).end();
+        res.status(response.status).json(mapper(result)).end();
       }).catch(next);
   }
 }
 
 const reject = (error, req, res, next) => {
   if (!error) return next();
-  
+
   const { message, code } = error;
-  res.status(code).json({error}).end()
+  res.status(code || 500).json({error}).end()
 }
 
-const service = (names, collection) => {
-  const { modelName, collectionName } = names;
-  const router = express.Router();
-
+const handles = Config => {
+  const { collectionName, modelName, collection, mapper } = Config;
   const handlers = handle(collection);
 
-  // console.log(`Mounting REST endpoints for ${modelName}...`);
+  return {
+    get: {
+      method: 'get',
+      route: `/${collectionName}/:id`,
+      handler: respond({ resultName: modelName, handler: handlers.get, mapper})
+    },
+    create: {
+      method: 'post',
+      route: `/${collectionName}`,
+      handler: respond({ resultName: modelName, handler: handlers.create, mapper})
+    },
+    put: {
+      method: 'put',
+      route: `/${collectionName}`,
+      handler: respond({ resultName: modelName, handler: handlers.update, mapper})
+    },
+    find: {
+      method: 'get',
+      route: `/${collectionName}`,
+      handler: respond({ resultName: collectionName, handler: handlers.find, mapper})
+    }
+  }
+}
 
-  router.get(`/${collectionName}/:id`, respond(modelName, handlers.get));
-  router.post(`/${collectionName}`,    respond(modelName, handlers.create));
-  router.put(`/${collectionName}`,     respond(modelName, handlers.update));
-  router.get(`/${collectionName}`,     respond(collectionName, handlers.find));
+const service = Config => {
+  var { names, collection, only, mapper } = Config;
+  const { modelName, collectionName } = names;
+  const handlers = handles({collectionName, modelName, collection, mapper});
+
+  // If no filter is specified, mount all the handles
+  if (!only) only = Object.keys(handlers);
+
+  const router = express.Router();
+  only.forEach(handle => {
+    const config = handlers[handle];
+    const { method, route, handler } = config;
+    router[method](route, handler);
+  });
 
   // Handle errors
-  router.use(reject);
-
-  // const routes = router.stack ? router.stack.map(r => {
-  //   if (r.route && r.route.path) return `${r.route.path}`;
-  // }) : [];
-
-  // console.log(`Done setting up ${name} route with: ${routes.join('\n')}`);
-
+  // router.use(reject);
 
   return router;
 }

@@ -13,10 +13,13 @@ const Collection = name => {
     });
 }
 
-const name = 'fruits';
-Collection(name).then(collection => {
+const modelName      = 'fruit';
+const collectionName = 'fruits';
 
-  const router = Router(name, collection);
+Collection(collectionName).then(collection => {
+  console.log('Starting server...');
+
+  const router = Router({names: {modelName, collectionName}, collection});
   server.use(router);
 
   console.log(`Express server listening on port ${port}`);

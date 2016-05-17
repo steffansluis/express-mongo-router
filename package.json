@@ -1,6 +1,6 @@
 {
   "name": "express-mongo-router",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "RESTful Express router for MongoDB collections",
   "main": "src/index.js",
   "scripts": {
